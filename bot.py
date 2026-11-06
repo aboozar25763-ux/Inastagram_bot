@@ -33,6 +33,17 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 log = logging.getLogger("igbot")
 
 
+def download(url: str, out_dir: str) -> list[Path]:
+    opts = {
+        "outtmpl": os.path.join(out_dir, "%(id)s_%(autonumber)s.%(ext)s"),
+        "format": "best[filesize<50M]/best[filesize_approx<50M]/best",
+        "quiet": True,
+        "noplaylist": False,
+        "socket_timeout": 30,
+    }
+    if COOKIES_FILE and os.path.exists(COOKIES_FILE):
+        opts["cookiefile"] = COOKIES_FILE
+    with yt_dlp.YoutubeDL(opts) as ydl:
         ydl.download([url])
     return sorted(Path(out_dir).iterdir())
 
@@ -106,6 +117,11 @@ async def handle_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.chat.send_action(ChatAction.UPLOAD_VIDEO)
         files = await asyncio.to_thread(download, url, tmp)
         if not files:
+            await status.edit_text("❌ چیزی برای دانلود پیدا نشد.")
+            return
+
+        sent = 0
+        for f in files:
             if f.stat().st_size > MAX_SIZE:
                 await update.message.reply_text(f"⚠️ فایل {f.name} بزرگ‌تر از ۵۰ مگابایته و نمی‌تونم بفرستمش.")
                 continue
@@ -131,15 +147,21 @@ async def handle_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+async def on_error(update, context: ContextTypes.DEFAULT_TYPE):
+    log.error("handler/polling error: %s", context.error, exc_info=context.error)
+
+
 def main():
     if not BOT_TOKEN:
         raise SystemExit("متغیر محیطی BOT_TOKEN تنظیم نشده.")
     app = Application.builder().token(BOT_TOKEN).build()
+    app.add_error_handler(on_error)
+    log.info("Bot starting... required channel: %s", REQUIRED_CHANNEL or "(none)")
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(check_join, pattern="^check_join$"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_link))
     app.run_polling()
 
 
-if name == "main":
+if __name__ == "__main__":
     main()
