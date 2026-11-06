@@ -38,9 +38,8 @@ def download(url: str, out_dir: str) -> list[Path]:
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "سلام 👋\nلینک پست، ریلز یا IGTV اینستاگرام رو بفرست تا برات دانلود کنم."
+        " ینک پست، ریلز یا IGTV اینستاگرام رو بفرست تا برات دانلود ."
     )
-
 
 async def handle_link(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text or ""
