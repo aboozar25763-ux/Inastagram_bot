@@ -13,7 +13,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandl
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 COOKIES_FILE = os.environ.get("IG_COOKIES", "")  # اختیاری: فایل cookies.txt برای پست‌های خصوصی/محدود
-MAX_SIZE = 50 * 1024 * 1024  # سقف آپلود ربات‌های تلگرام: ۵۰ مگابایت
+MAX_SIZE = 50 * 1024 * 1024  # سقف آپلود ربات‌های تلگرام: 1000 مگابایت
 
 IG_REGEX = re.compile(r"https?://(?:www\.)?instagram\.com/(?:p|reel|reels|tv|stories)/[^\s]+", re.I)
 
